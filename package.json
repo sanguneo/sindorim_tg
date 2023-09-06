@@ -8,6 +8,7 @@
     "prepare": "node generateRouter.js",
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "cp .nojekyll dist/.nojekyll",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist",
     "test": "jest"

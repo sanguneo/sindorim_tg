@@ -5,12 +5,10 @@ import React from 'react';
 
 const App = (): React.ReactElement => {
   const env = process.env.NODE_ENV;
-  return (
-    <>
+  return (<>
       <Global styles={GlobalStyles} />
       <CustomRouter />
-    </>
-  );
+    </>);
 };
 
 export default App;
