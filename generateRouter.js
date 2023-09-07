@@ -3,7 +3,7 @@ import { pascalCase } from 'change-case';
 import path from 'path';
 
 function fromDir(startPath, filter, res = []) {
-  if (!fs.existsSync(startPath)) { 
+  if (!fs.existsSync(startPath)) {
     console.error('no dir', startPath);
     return [];
   }
@@ -31,14 +31,14 @@ function fromDir(startPath, filter, res = []) {
 const pageRoutes = () => fromDir('./src/pages', '.tsx');
 
 const componentMaker = (pages) => `import React from 'react';
-import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import { Routes, Route, HashRouter } from 'react-router-dom';
 ${pages.map(page => `import ${page[0]} from '${page[2].replace('.tsx', '')}';`).join('\n')}
 
-const CustomRouter = (props = {}) => <BrowserRouter>
+const CustomRouter = (props = {}) => <HashRouter>
   <Routes {...props}>
     ${pages.map(page => `<Route key="${page[0]}" path="${page[1]}" element={<${page[0]}/>} />`).join('\n    ')}
   </Routes>
-</BrowserRouter>;
+</HashRouter>;
 
 export default CustomRouter;
 `;

@@ -6,6 +6,8 @@ export const PopCoverMakerContainer = styled.div`
   margin-bottom: 100px;
   & >canvas {
     border: 1px solid lightgray;
+    width: 512px;
+    height: 512px;
   }
   button, span.btn {
     display: inline-block;
@@ -19,6 +21,7 @@ export const PopCoverMakerContainer = styled.div`
   }
   input {
     height: 30px;
+    max-width: 80px;
   }
 `;
 export const ControllerContainer = styled.div`
@@ -34,7 +37,7 @@ export const ControllerContainer = styled.div`
 `;
 
 export const PreviewImage = styled.div`
-  margin-top: 20px;
+  margin-top: 5px;
   position: relative;
   width: auto;
   height: auto;
@@ -59,7 +62,11 @@ export const PreviewImageContainer = styled.div`
   width: 100%;
   margin-top: 20px;
   display: flex;
-  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: dimgray;
+  font-size: 14px;
+  text-align: center;
   & > a {
     position: relative;
     flex-direction: column;

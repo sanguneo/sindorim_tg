@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {} from './PopCoverMaker.constants';
 import { IPopCoverMaker } from './PopCoverMaker.types';
 import {
@@ -8,12 +8,15 @@ import {
   PreviewImageContainer,
 } from './PopCoverMaker.styles';
 
+import detectTouchEvents from 'detect-touch-events';
+
 
 const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
   const [actualImageZoom, setActualImageZoom] = useState<number>(1);
   const [imageZoom, setImageZoom] = useState<number>(1);
   const [borderColor, setBorderColor] = useState<string>('#EA37A7');
-  const [delta, setDelta] = useState<{ dx: number, dy: number }>({ dx: 0, dy: 0 });
+  const [delta, setDelta] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
+  const [mouseDelta, setMouseDelta] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
   const [imageFile, setImageFile] = useState<File>();
 
   const [previewImage, setPreviewImage] = useState<string>('');
@@ -44,7 +47,7 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
     const actualHeight = img.height / zoomRatio;
     const dx = (512 - actualWidth) / 2;
     const dy = (512 - actualHeight) / 2;
-    setDelta({ dx, dy });
+    setDelta({ x: dx, y: dy });
     redraw(dx, dy, actualWidth, actualHeight);
   }
 
@@ -53,12 +56,88 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
     const actualHeight = img.height / actualImageZoom * imageZoom;
     const dx = (512 - actualWidth) / 2;
     const dy = (512 - actualHeight) / 2;
-    setDelta({ dx, dy });
+    setDelta({ x: dx, y: dy });
+    setMouseDelta({ x: 0, y: 0 });
+  }
+
+  const translatePos = (e : MouseEvent | TouchEvent) => {
+    if(e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel'){
+      const te = e as TouchEvent;
+      const touch = te.touches[0] || te.changedTouches[0];
+      return {
+        x: touch.pageX,
+        y: touch.pageY,
+      }
+    } else if (e.type == 'mousedown' || e.type == 'mouseup' || e.type == 'mousemove' || e.type == 'mouseover'|| e.type=='mouseout' || e.type=='mouseenter' || e.type=='mouseleave') {
+      const me = e as MouseEvent;
+      return {
+        x: me.clientX,
+        y: me.clientY
+      }
+    }
   }
 
   useEffect(() => {
-    redraw();
-  }, [ctx]);
+    if (!canvasRef?.current) return;
+
+    const canvas = canvasRef?.current;
+    let moving = false;
+    let firstpos = {x: 0, y: 0};
+    let lastDelta = {x: 0, y: 0};
+
+    const onMousedown = (e: MouseEvent | TouchEvent) => requestAnimationFrame(()=>{
+      moving = true;
+      const {x, y} = translatePos(e);
+      firstpos.x = x;
+      firstpos.y = y;
+      setMouseDelta((prev) => {
+        lastDelta.x = prev.x;
+        lastDelta.y = prev.y;
+        return prev;
+      });
+    });
+
+    const onMousemove = (e: MouseEvent | TouchEvent) => requestAnimationFrame(()=>{
+      if (!moving) return;
+      const {x, y} = translatePos(e);
+      setMouseDelta(() => ({
+        x: lastDelta.x + (x - firstpos.x),
+        y: lastDelta.y + (y - firstpos.y),
+      }));
+    });
+
+    const onMouseup = (e: MouseEvent | TouchEvent) => requestAnimationFrame(()=>{
+      moving = false;
+    });
+    if (!detectTouchEvents.hasSupport) {
+      canvas.addEventListener('mousedown', onMousedown);
+      canvas.addEventListener('mousemove', onMousemove);
+      canvas.addEventListener('mouseup', onMouseup);
+      canvas.addEventListener('mouseleave', onMouseup);
+    } else {
+      canvas.addEventListener('touchstart', onMousedown);
+      canvas.addEventListener('touchmove', onMousemove);
+      canvas.addEventListener('touchend', onMouseup);
+      canvas.addEventListener('touchcancel', onMouseup);
+    }
+
+
+    return () => {
+      if (!detectTouchEvents.hasSupport) {
+        canvas.removeEventListener('mousedown', onMousedown);
+        canvas.removeEventListener('mousemove', onMousemove);
+        canvas.removeEventListener('mouseup', onMouseup);
+        canvas.removeEventListener('mouseleave', onMouseup);
+      } else {
+        canvas.removeEventListener('touchstart', onMousedown);
+        canvas.removeEventListener('touchmove', onMousemove);
+        canvas.removeEventListener('touchend', onMouseup);
+        canvas.removeEventListener('touchcancel', onMouseup);
+      }
+    }
+
+
+  }, [canvasRef?.current]);
 
   useEffect(() => {
     if (!imageFile) return;
@@ -70,8 +149,8 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
     const actualWidth = img.width / actualImageZoom;
     const actualHeight = img.height / actualImageZoom;
 
-    redraw(delta.dx, delta.dy, actualWidth, actualHeight, imageZoom);
-  }, [img, img.width,  img.height,  delta,  delta.dx, delta.dy, imageZoom]);
+    redraw(delta.x + mouseDelta.x, delta.y + mouseDelta.y, actualWidth, actualHeight, imageZoom);
+  }, [img, img.width,  img.height,  delta,  delta.x, delta.y, mouseDelta,  mouseDelta.x, mouseDelta.y, imageZoom]);
 
   return (
     <PopCoverMakerContainer>
@@ -80,15 +159,13 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
         <label><span>강조컬러</span><input type='text' value={borderColor} onChange={(e)=>setBorderColor(e.target.value)}/></label>
         <label><span className={'btn'}>이미지 선택</span><input type='file' onChange={e => setImageFile(e.target.files[0] || undefined)}/></label>
         <button onClick={setCenter}>가운데 맞춤</button>
-        <div>
-          <button onClick={()=> setDelta(prevState => ({...prevState, dx: prevState.dx - 10}))}>◀</button>
-          <button onClick={()=> setDelta(prevState => ({...prevState, dy: prevState.dy - 10}))}>▲</button>
-          <button onClick={()=> setDelta(prevState => ({...prevState, dy: prevState.dy + 10}))}>▼</button>
-          <button onClick={()=> setDelta(prevState => ({...prevState, dx: prevState.dx + 10}))}>►</button>
-        </div>
-        <label><span>zoom</span><input type='number' value={imageZoom} step={0.1} min={1} onChange={(e)=>setImageZoom(Number(e.target.value))}/></label>
+        <span>
+          <button onClick={()=>setImageZoom((prev)=> prev+0.1)}>확대</button>
+          <button onClick={()=>setImageZoom((prev)=> prev-0.1)}>축소</button>
+        </span>
       </ControllerContainer>
       {previewImage !== '' && imageFile ? <PreviewImageContainer>
+        미리보기<br />(인기스타일은 같이 안나옴)
         <a href={previewImage} download={'pop_' + imageFile?.name}><PreviewImage>
           <img src={previewImage}/>
         </PreviewImage><button>다운로드</button></a>

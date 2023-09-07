@@ -21,6 +21,7 @@
     "axios": "^0.27.2",
     "change-case": "^4.1.2",
     "dayjs": "^1.11.5",
+    "detect-touch-events": "^2.0.2",
     "gh-pages": "^6.0.0",
     "i18next": "^21.9.2",
     "i18next-browser-languagedetector": "^6.1.5",
