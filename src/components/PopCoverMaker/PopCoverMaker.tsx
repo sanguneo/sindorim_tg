@@ -8,8 +8,6 @@ import {
   PreviewImageContainer,
 } from './PopCoverMaker.styles';
 
-import detectTouchEvents from 'detect-touch-events';
-
 
 const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
   const [actualImageZoom, setActualImageZoom] = useState<number>(1);
@@ -85,7 +83,7 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
     let firstpos = {x: 0, y: 0};
     let lastDelta = {x: 0, y: 0};
 
-    const onMousedown = (e: MouseEvent | TouchEvent) => requestAnimationFrame(()=>{
+    const onMousedown = (e: MouseEvent | TouchEvent) => {
       moving = true;
       const {x, y} = translatePos(e);
       firstpos.x = x;
@@ -95,21 +93,22 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
         lastDelta.y = prev.y;
         return prev;
       });
-    });
+    };
 
-    const onMousemove = (e: MouseEvent | TouchEvent) => requestAnimationFrame(()=>{
+    const onMousemove = (e: MouseEvent | TouchEvent) => {
       if (!moving) return;
       const {x, y} = translatePos(e);
       setMouseDelta(() => ({
         x: lastDelta.x + (x - firstpos.x),
         y: lastDelta.y + (y - firstpos.y),
       }));
-    });
+    };
 
-    const onMouseup = (e: MouseEvent | TouchEvent) => requestAnimationFrame(()=>{
+    const onMouseup = (e: MouseEvent | TouchEvent) => {
       moving = false;
-    });
-    if (!detectTouchEvents.hasSupport) {
+    };
+
+    if (!('ontouchstart' in window)) {
       canvas.addEventListener('mousedown', onMousedown);
       canvas.addEventListener('mousemove', onMousemove);
       canvas.addEventListener('mouseup', onMouseup);
@@ -123,7 +122,7 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
 
 
     return () => {
-      if (!detectTouchEvents.hasSupport) {
+      if (!('ontouchstart' in window)) {
         canvas.removeEventListener('mousedown', onMousedown);
         canvas.removeEventListener('mousemove', onMousemove);
         canvas.removeEventListener('mouseup', onMouseup);
@@ -150,19 +149,19 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
     const actualHeight = img.height / actualImageZoom;
 
     redraw(delta.x + mouseDelta.x, delta.y + mouseDelta.y, actualWidth, actualHeight, imageZoom);
-  }, [img, img.width,  img.height,  delta,  delta.x, delta.y, mouseDelta,  mouseDelta.x, mouseDelta.y, imageZoom]);
+  }, [img, img.width,  img.height,  delta,  delta.x, delta.y, mouseDelta,  mouseDelta.x, mouseDelta.y, imageZoom, borderColor]);
 
   return (
     <PopCoverMakerContainer>
       <canvas ref={canvasRef} width={512} height={512}/>
       <ControllerContainer>
-        <label><span>강조컬러</span><input type='text' value={borderColor} onChange={(e)=>setBorderColor(e.target.value)}/></label>
         <label><span className={'btn'}>이미지 선택</span><input type='file' onChange={e => setImageFile(e.target.files[0] || undefined)}/></label>
         <button onClick={setCenter}>가운데 맞춤</button>
         <span>
           <button onClick={()=>setImageZoom((prev)=> prev+0.1)}>확대</button>
           <button onClick={()=>setImageZoom((prev)=> prev-0.1)}>축소</button>
         </span>
+        <label><input type='color' value={borderColor} onChange={(e)=>setBorderColor(e.target.value)}/><button onClick={(e)=>{e.stopPropagation();setBorderColor('#EA37A7');}}>기본컬러</button></label>
       </ControllerContainer>
       {previewImage !== '' && imageFile ? <PreviewImageContainer>
         미리보기<br />(인기스타일은 같이 안나옴)

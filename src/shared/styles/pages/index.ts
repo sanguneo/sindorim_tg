@@ -9,4 +9,17 @@ export const CommonContainer = styled.main<React.CSSProperties>`
   width: 100%;
   padding: 20px 0;
   gap: 30px;
+  & > h1 {
+    margin-bottom: 50px;
+  }
+  & > a {
+    display: inline-flex;
+    font-size: 20px;
+    &::after {
+      content: '>';
+      margin-left: 20px;
+    }
+    padding: 10px 20px;
+    border: 1px solid lightgray;
+  }
 `;

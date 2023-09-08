@@ -13,11 +13,12 @@ export const PopCoverMakerContainer = styled.div`
     display: inline-block;
     box-sizing: border-box;
     border: 1px solid lightgray;
-    padding: 0 6px;
-    height: 30px;
-    line-height: 30px;
-    font-size: 14px;
+    padding: 0 12px;
+    height: 36px;
+    line-height: 36px;
+    font-size: 16px;
     color: dimgray;
+    cursor: pointer;
   }
   input {
     height: 30px;
@@ -30,9 +31,17 @@ export const ControllerContainer = styled.div`
   gap: 10px;
   justify-content: space-between;
   label {
+    display: inline-flex;
+    & > input {
+      height: 100%;
+    }
     input[type='file'] {
       display: none;
     }
+  }
+  & > span {
+    display: inline-flex;
+    gap: 10px;
   }
 `;
 
