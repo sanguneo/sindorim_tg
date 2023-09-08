@@ -57,7 +57,7 @@ export const ControllerContainer = styled.div`
   }
 `;
 
-export const PreviewImage = styled.div`
+export const PreviewImage = styled.div<{r?: boolean}>`
   margin-top: 5px;
   position: relative;
   width: auto;
@@ -74,9 +74,16 @@ export const PreviewImage = styled.div`
     z-index: 2;
   }
   & > img {
-    width: 100px;
-    height: 100px;
+    object-fit: cover;
+    ${props => !props.r ? `
+      width: 100px;
+      height: 100px;
+  ` : `
+      width: 90px;
+      height: 80px;
+  `}
   }
+  
 `;
 
 export const PreviewImageContainer = styled.div`
@@ -86,13 +93,23 @@ export const PreviewImageContainer = styled.div`
   align-items: center;
   flex-direction: column;
   color: dimgray;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 500;
   text-align: center;
+  & > span {
+    font-size: 12px;
+  }
   & > a {
     position: relative;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    & > span {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 10px;
+    };
     & > button {
       width: 100px;
     }

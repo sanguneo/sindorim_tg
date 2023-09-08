@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {} from './PopCoverMaker.constants';
+import heic2any from 'heic2any';
+import { SIZE } from './PopCoverMaker.constants';
 import { IPopCoverMaker } from './PopCoverMaker.types';
 import {
   ControllerContainer,
@@ -7,7 +8,7 @@ import {
   PreviewImage,
   PreviewImageContainer,
 } from './PopCoverMaker.styles';
-import heic2any from 'heic2any';
+
 
 
 const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
@@ -25,27 +26,27 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
 
   const img = useMemo(()=> new Image(), []);
 
-  const redraw = (dx=0, dy=0, width=512, height=512, zoom=1) => {
+  const redraw = (dx=0, dy=0, width=SIZE.width, height=SIZE.height, zoom=1) => {
     if (!ctx) return;
-    ctx.clearRect(0,0, 512, 512);
+    ctx.clearRect(0,0, SIZE.width, SIZE.height);
     ctx.drawImage(img, dx, dy, width*zoom, height*zoom);
-    ctx.lineWidth = 48;
+    ctx.lineWidth = SIZE.stroke;
     ctx.strokeStyle = borderColor + 'CC';
     ctx.beginPath();
     // @ts-ignore
-    ctx.roundRect(0, 0, 512, 512, 48);
+    ctx.roundRect(0,0, SIZE.width, SIZE.height, SIZE.radius);
     ctx.stroke();
     setPreviewImage(ctx.canvas.toDataURL('image/jpeg', 1));
   }
 
   img.onload = function() {
-    const zoomRatio = Math.min(img.width / 512, img.height / 512);
+    const zoomRatio = Math.min(img.width / SIZE.width, img.height / SIZE.height);
     setActualImageZoom(zoomRatio);
     setImageZoom(1);
     const actualWidth = img.width / zoomRatio;
     const actualHeight = img.height / zoomRatio;
-    const dx = (512 - actualWidth) / 2;
-    const dy = (512 - actualHeight) / 2;
+    const dx = (SIZE.width - actualWidth) / 2;
+    const dy = (SIZE.height - actualHeight) / 2;
     setDelta({ x: dx, y: dy });
     redraw(dx, dy, actualWidth, actualHeight);
   }
@@ -53,8 +54,8 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
   const setCenter = ()=> {
     const actualWidth = img.width / actualImageZoom * imageZoom;
     const actualHeight = img.height / actualImageZoom * imageZoom;
-    const dx = (512 - actualWidth) / 2;
-    const dy = (512 - actualHeight) / 2;
+    const dx = (SIZE.width - actualWidth) / 2;
+    const dy = (SIZE.height - actualHeight) / 2;
     setDelta({ x: dx, y: dy });
     setMouseDelta({ x: 0, y: 0 });
   }
@@ -166,7 +167,7 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
 
   return (
     <PopCoverMakerContainer>
-      <canvas ref={canvasRef} width={512} height={512}/>
+      <canvas ref={canvasRef} width={SIZE.width} height={SIZE.height}/>
       <ControllerContainer>
         <label><span className={'btn'}>이미지 선택</span><input type='file' onChange={e => setImageFile(e.target.files[0] || undefined)}/></label>
         <button onClick={setCenter}>가운데 맞춤</button>
@@ -177,10 +178,13 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
         <label><input type='color' value={borderColor} onChange={(e)=>setBorderColor(e.target.value)}/><button onClick={(e)=>{e.stopPropagation();setBorderColor('#EA37A7');}}>기본컬러</button></label>
       </ControllerContainer>
       {previewImage !== '' && imageFile ? <PreviewImageContainer>
-        미리보기<br />(인기스타일은 같이 안나옴)
-        <a href={previewImage} download={'pop_' + imageFile?.name}><PreviewImage>
-          <img src={previewImage}/>
-        </PreviewImage><button>다운로드</button></a>
+        미리보기<br /><span>(인기스타일은 같이 안나옴)</span>
+        <a href={previewImage} download={'pop_' + imageFile?.name}>
+          <PreviewImage>
+            <img src={previewImage}/>
+          </PreviewImage>
+          <button>다운로드</button>
+        </a>
       </PreviewImageContainer> : <></>}
     </PopCoverMakerContainer>
   );
