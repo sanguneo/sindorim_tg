@@ -10,6 +10,7 @@
     "build": "vite build",
     "postbuild": "cp .nojekyll dist/.nojekyll",
     "preview": "vite preview",
+    "predeploy": "yarn build",
     "deploy": "gh-pages -d dist -t true",
     "test": "jest"
   },
