@@ -7,6 +7,7 @@ import {
   PreviewImage,
   PreviewImageContainer,
 } from './PopCoverMaker.styles';
+import heic2any from 'heic2any';
 
 
 const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
@@ -77,6 +78,7 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
 
   useEffect(() => {
     if (!canvasRef?.current) return;
+    document.body.style.overscrollBehaviorY = 'none';
 
     const canvas = canvasRef?.current;
     let moving = false;
@@ -140,7 +142,18 @@ const PopCoverMaker = (props: IPopCoverMaker): React.ReactElement => {
 
   useEffect(() => {
     if (!imageFile) return;
-    img.src = URL.createObjectURL(imageFile);
+    if (imageFile.name.endsWith('.heic')){
+      heic2any({
+        blob: imageFile,
+        toType: "image/jpeg",
+        quality: 1,
+      }).then((conversionResult) => {
+        const f = new File([conversionResult as Blob], imageFile.name.replace('.heic', '.jpg'), {type: 'image/jpeg'});
+        img.src = URL.createObjectURL(f);
+      })
+    } else {
+      img.src = URL.createObjectURL(imageFile);
+    }
   }, [imageFile]);
 
   useEffect(() => {
