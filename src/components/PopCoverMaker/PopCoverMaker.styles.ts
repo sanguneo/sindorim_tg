@@ -24,6 +24,18 @@ export const PopCoverMakerContainer = styled.div`
     height: 30px;
     max-width: 80px;
   }
+
+  & > a {
+    display: inline-flex;
+    font-size: 20px;
+    &::after {
+      content: '>';
+      margin-left: 20px;
+    }
+    padding: 10px 20px;
+    border: 1px solid lightgray;
+  }
+  
 `;
 export const ControllerContainer = styled.div`
   display: flex;

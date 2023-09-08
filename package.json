@@ -6,7 +6,7 @@
   "homepage": "https://sanguneo.github.io/sindorim_tg/",
   "scripts": {
     "prepare": "node generateRouter.js",
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "postbuild": "cp .nojekyll dist/.nojekyll",
     "preview": "vite preview",

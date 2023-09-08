@@ -10,13 +10,14 @@ export const CommonContainer = styled.main<React.CSSProperties>`
   padding: 20px 0;
   gap: 30px;
   & > h1 {
+    margin-top: 50px;
     margin-bottom: 50px;
   }
-  & > a {
+  & > a.link {
     display: inline-flex;
-    font-size: 20px;
+    font-size:25px;
     &::after {
-      content: '>';
+      content: '▶︎';
       margin-left: 20px;
     }
     padding: 10px 20px;
