@@ -3,8 +3,8 @@
   "short_name": "토니앤가이신도림 운영도구",
   "start_url": "https://tgsindorim.sanguneo.com/",
   "display": "standalone",
-  "background_color": "#F8F7DA",
-  "theme_color": "#8C383A",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
   "description": "토니앤가이신도림 운영도구",
   "icons": [
     {
